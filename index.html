@@ -10,36 +10,37 @@
     <link rel="stylesheet" type="text/css" href="assets/css/style.css">
 </head>
 
-<body> <!-- *********************************************************************************************************************** -->
+<body>
+    <!-- *********************************************************************************************************************** -->
     <div class="container no-padding border border-secondary rounded-bottom text-white">
         <h1 class="text-center bg-secondary" id="title">Snadwich Train Scheduler</h1>
     </div>
     <br>
-<!-- Current Train Shedule ******************************************************************************************************** -->
+    <!-- Current Train Shedule ******************************************************************************************************** -->
     <div class="container card border-primary no-padding">
         <h5 class="card-header bg-primary text-white">
         Current Train Schedule
         </h5>
-        <div class="container card-body">
+        <div class="container card-body" id="currentTrainList">
             <div class="row">
-                <div class="col-3">Train Name</div>
-                <div class="col-3">Destination</div>
-                <div class="col-2">Frequency (min)</div>
-                <div class="col-2">Next Arrival</div>
-                <div class="col-2">Minutes Away</div>
+                <div class="col-3"><strong>Train Name</strong></div>
+                <div class="col-3"><strong>Destination</strong></div>
+                <div class="col-2"><strong>Frequency (min)</strong></div>
+                <div class="col-2"><strong>Next Arrival</strong></div>
+                <div class="col-2"><strong>Minutes Away</strong></div>
             </div>
-            <hr>
+            <!-- <hr>
             <div class="row">
                 <div class="col-3">Ex. Train Name</div>
                 <div class="col-3">EX. Destination</div>
                 <div class="col-2">EX. Frequency (min)</div>
                 <div class="col-2">Ex. Next Arrival</div>
                 <div class="col-2">Ex. Minutes Away</div>
-            </div>          
+            </div>  -->
         </div>
     </div>
     <br>
-<!-- * When adding trains, administrators should be able to submit the following ************************************************** -->
+    <!-- * When adding trains, administrators should be able to submit the following ************************************************** -->
     <div class="container card border-primary no-padding">
         <h5 class="card-header bg-primary text-white">
             Add Train
@@ -47,28 +48,30 @@
         <div class="card-body">
             <form>
                 <!-- * Train Name -->
-              <div class="form-group">
-                <div >Train Name</div>
-                <input type="text" class="form-control" placeholder="Train Name">
-              </div>
+                <div class="form-group">
+                    <div>Train Name</div>
+                    <input type="text" class="form-control" id="addTrainName" placeholder="Train Name">
+                </div>
                 <!-- * Destination  -->
-              <div class="form-group">
-                <div >Destination</div>
-                <input type="text" class="form-control" placeholder="Destination">
-              </div>
+                <div class="form-group">
+                    <div>Destination</div>
+                    <input type="text" class="form-control" id="addDestination" placeholder="Destination">
+                </div>
                 <!-- * First Train Time in military time -->
-              <div class="form-group">
-                <div >First Train Time</div>
-                <input type="time" class="form-control" placeholder="Time">
-              </div>
+                <div class="form-group">
+                    <div>First Train Time</div>
+                    <input type="number" class="form-control" id="addFirstTrainTime" placeholder="Time (24hrs, hhmm)">
+                    <!-- <small class="text-muted">24hr format, hhmm</small> -->
+                </div>
                 <!-- * Frequency in minutes -->
-              <div class="form-group">
-                <div >Frequency</div>
-                <input type="number" class="form-control" placeholder="Frequency">
+                <div class="form-group">
+                    <div>Frequency</div>
+                    <input type="number" class="form-control" id="addFrequency" placeholder="Frequency (in minutes)">
+                    <!-- <small class="text-muted">In minutes</small> -->
               </div>
                 <!-- Submit button -->
               <div>
-                  <input type="submit" class="btn btn-primary">
+                  <input type="submit" class="btn btn-primary" id="addNewTrainInfo">
               </div>
             </form>
         </div>
@@ -78,7 +81,7 @@
 <!-- * Users from many different machines must be able to view same train times. -->
 
 <!-- * Styling and theme are completely up to you. Get Creative! -->
-
+    <script src="https://www.gstatic.com/firebasejs/4.3.1/firebase.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="assets/js/app.js"></script>
 </body>
