@@ -17,14 +17,14 @@ $(document).ready(function() {
     firebase.initializeApp(config);
 
     var database = firebase.database();
-    var now = moment();
+    var rightMeow = moment(); // now
     var keyList = [];
     var trainCount;
 
     database.ref().on("value", addToList);
     $("#addNewTrainInfo").click(addNewTrainInfo);
 
-    console.log(moment().format("MM-DD-YY HHmm SS"));
+    console.log(moment().format("HHmm"));
 
     // When submitted adds fields to database.
     function addNewTrainInfo(event) {
@@ -54,38 +54,45 @@ $(document).ready(function() {
             console.log("Train count: " + trainCount);
             console.log(snapshot.val());
 
-            // Clear then rebuild the train list labels every 60 seconds  
-            $("#currentTrainList").empty();
-            $("#currentTrainList").append(
-                '<div class="row">' +
-                    '<div class="col-3"><strong>Train Name</strong></div>'+
-                    '<div class="col-3"><strong>Destination</strong></div>' +
-                    '<div class="col-2"><strong>Frequency (min)</strong></div>' +
-                    '<div class="col-2"><strong>Next Arrival</strong></div>' +
-                    '<div class="col-2"><strong>Minutes Away</strong></div>' +
-                '</div>' 
-                );
+            // Clear then rebuild the train list labels every 60 seconds 
+            rePaint();
+            clearInterval(timerID);
+            var timerID = setInterval(rePaint, 10 * 1000);
+            function rePaint() {
+                console.log("Updated " + moment().format("HHmm ss"));
 
-            // Run a function for every child in the root
-            snapshot.forEach(function(childSnapshot) {
-
-                var trainName = childSnapshot.val().trainName;
-                var destination = childSnapshot.val().destination;
-                var frequency = childSnapshot.val().frequency;
-                var firstTrainTime = childSnapshot.val().firstTrainTime;
-                var minutesAway = firstTrainTime - moment().format("HHmm");
-
+                $("#currentTrainList").empty();
                 $("#currentTrainList").append(
-                    '<hr>' +
                     '<div class="row">' +
-                    '<div class="col-3">' + trainName + '</div>' +
-                    '<div class="col-3">' + destination + '</div>' +
-                    '<div class="col-2">' + frequency + '</div>' +
-                    '<div class="col-2">' + firstTrainTime + '</div>' +
-                    '<div class="col-2">' + minutesAway + '</div>' +
-                    '</div>'
-                );
-            });
+                        '<div class="col-3"><strong>Train Name</strong></div>'+
+                        '<div class="col-3"><strong>Destination</strong></div>' +
+                        '<div class="col-2"><strong>Frequency (min)</strong></div>' +
+                        '<div class="col-2"><strong>Next Arrival</strong></div>' +
+                        '<div class="col-2"><strong>Minutes Away</strong></div>' +
+                    '</div>' 
+                    );
+
+                // Run a function for every child in the root
+                snapshot.forEach(function(childSnapshot) {
+
+                    var trainName = childSnapshot.val().trainName;
+                    var destination = childSnapshot.val().destination;
+                    var frequency = childSnapshot.val().frequency;
+                    var firstTrainTime = childSnapshot.val().firstTrainTime;
+                    var minutesAway = moment(firstTrainTime, "HHmm").diff(rightMeow, "minutes");
+
+                    $("#currentTrainList").append(
+                        '<hr>' +
+                        '<div class="row">' +
+                        '<div class="col-3">' + trainName + '</div>' +
+                        '<div class="col-3">' + destination + '</div>' +
+                        '<div class="col-2">' + frequency + '</div>' +
+                        '<div class="col-2">' + firstTrainTime + '</div>' +
+                        '<div class="col-2">' + minutesAway + '</div>' +
+                        '</div>'
+                    );
+                });
+            }
         } else {
             console.log("Doesn't Exist")
 
