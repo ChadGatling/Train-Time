@@ -17,10 +17,15 @@ $(document).ready(function() {
     firebase.initializeApp(config);
 
     var database = firebase.database();
+    var childKey = "default";
+    var now = moment();
+    var keyList = [];
     var trainCount;
 
     database.ref().on("value", addToList);
     $("#addNewTrainInfo").click(addNewTrainInfo);
+
+    console.log(moment().add(5, "minutes").format("HHmm"));
 
     // When submitted adds fields to database.
     function addNewTrainInfo(event) {
@@ -31,40 +36,76 @@ $(document).ready(function() {
         var firstTrainTime = $("#addFirstTrainTime").val().trim();
         var frequency = $("#addFrequency").val().trim();
 
-        database.ref("Train-" + trainCount).push({
+        childKey = database.ref().push({
             trainName: trainName,
             destination: destination,
             firstTrainTime: firstTrainTime,
             frequency: frequency
-        });
+        }).key;
 
-        trainCount++;
+        keyList.push(childKey);
     }
     // When database is updated add new values to current train list
     function addToList(snapshot) {
         if (snapshot.exists()) {
             console.log("Exists");
-            console.log(snapshot.val().trainName); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! snapshot not working
 
-            var trainName = snapshot.val().trainName;
-            var destination = snapshot.val().destination;
-            var frequency = snapshot.val().frequency;
-            var firstTrainTime = snapshot.val().firstTrainTime;
+            trainCount = snapshot.numChildren();
 
-            $("#currentTrainList").append(
-                '<hr>' +
-                '<div class="row">' +
-                '<div class="col-3">' + trainName + '</div>' +
-                '<div class="col-3">' + destination + '</div>' +
-                '<div class="col-2">' + frequency + '</div>' +
-                '<div class="col-2">' + firstTrainTime + '</div>' +
-                '<div class="col-2">Ex. Minutes Away</div>' +
-                '</div>'
-            );
+            console.log("Train count: " + trainCount);
+            console.log(snapshot.val());
+
+            // Clear then rebuild the train list labels every 60 seconds
+            clearInterval(timerID); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Timer Not working as intended.
+            var timerID = setInterval(function() {   
+                $("#currentTrainList").empty();
+                $("#currentTrainList").append(
+                    '<div class="row">' +
+                        '<div class="col-3"><strong>Train Name</strong></div>'+
+                        '<div class="col-3"><strong>Destination</strong></div>' +
+                        '<div class="col-2"><strong>Frequency (min)</strong></div>' +
+                        '<div class="col-2"><strong>Next Arrival</strong></div>' +
+                        '<div class="col-2"><strong>Minutes Away</strong></div>' +
+                    '</div>' 
+                    );
+
+                // Run a function for every child in the root
+                snapshot.forEach(function(childSnapshot) {
+
+                    var trainName = childSnapshot.val().trainName;
+                    var destination = childSnapshot.val().destination;
+                    var frequency = childSnapshot.val().frequency;
+                    var firstTrainTime = childSnapshot.val().firstTrainTime;
+                    var minutesAway = firstTrainTime - moment().format("HHmm");
+
+                    $("#currentTrainList").append(
+                        '<hr>' +
+                        '<div class="row">' +
+                        '<div class="col-3">' + trainName + '</div>' +
+                        '<div class="col-3">' + destination + '</div>' +
+                        '<div class="col-2">' + frequency + '</div>' +
+                        '<div class="col-2">' + firstTrainTime + '</div>' +
+                        '<div class="col-2">' + minutesAway + '</div>' +
+                        '</div>'
+                    );
+                });
+                console.log("Updated: " + moment().format("HHmm ss"));
+            }, 5*1000);
         } else {
             console.log("Doesn't Exist")
 
             trainCount = 0;
+
+            $("#currentTrainList").append(
+                '<hr>' +
+                '<div class="row">' +
+                '<div class="col-3">None</div>' +
+                '<div class="col-3"></div>' +
+                '<div class="col-2"></div>' +
+                '<div class="col-2"></div>' +
+                '<div class="col-2"></div>' +
+                '</div>'
+            );
         }
     }
 });
