@@ -40,7 +40,7 @@ $(document).ready(function() {
         if (firstTrainTime === "" || firstTrainTime.length !== 4 || (firstTrainTime % 100) - 59 > 0 || firstTrainTime - 2359 > 0) {
             alert("Please enter a valid First train time.")
 
-        }else {
+        } else {
             // Push the data to the database (inside a variable so as to be able to get the key later)
             childKey = database.ref().push({
                 trainName: trainName,
@@ -48,6 +48,7 @@ $(document).ready(function() {
                 firstTrainTime: firstTrainTime,
                 frequency: frequency
             }).key;
+
         }
     }
     // When database is updated add new values to current train list
@@ -62,19 +63,20 @@ $(document).ready(function() {
 
             // Clear then rebuild the train list labels every 60 seconds 
             rePaint();
+
             function rePaint() {
                 console.log("Updated " + moment().format("HHmm ss"));
 
                 $("#currentTrainList").empty();
                 $("#currentTrainList").append(
                     '<div class="row">' +
-                        '<div class="col-3"><strong>Train Name</strong></div>'+
-                        '<div class="col-3"><strong>Destination</strong></div>' +
-                        '<div class="col-2"><strong>Frequency (min)</strong></div>' +
-                        '<div class="col-2"><strong>Next Arrival</strong></div>' +
-                        '<div class="col-2"><strong>Minutes Away</strong></div>' +
-                    '</div>' 
-                    );
+                    '<div class="col-3"><strong>Train Name</strong></div>' +
+                    '<div class="col-3"><strong>Destination</strong></div>' +
+                    '<div class="col-2"><strong>Frequency (min)</strong></div>' +
+                    '<div class="col-2"><strong>Next Arrival</strong></div>' +
+                    '<div class="col-2"><strong>Minutes Away</strong></div>' +
+                    '</div>'
+                );
 
                 // Run a function for every child in the root
                 snapshot.forEach(function(childSnapshot) {
@@ -84,6 +86,18 @@ $(document).ready(function() {
                     var frequency = childSnapshot.val().frequency;
                     var firstTrainTime = childSnapshot.val().firstTrainTime;
                     var minutesAway = moment(firstTrainTime, "HHmm").diff(rightMeow, "minutes");
+
+                    if (moment(firstTrainTime, "HHmm").diff(rightMeow, "minutes") < 0) {
+                        console.log("First time: " + firstTrainTime);    
+                        firstTrainTime = moment(firstTrainTime, "HHmm").add(frequency, "minutes").format("HHmm");
+                        console.log("Second time: " + firstTrainTime);
+                        database.ref().set({
+                            trainName: trainName,
+                            destination: destination,
+                            firstTrainTime: firstTrainTime, // Overwriting all database
+                            frequency: frequency
+                        });
+                    }
 
                     $("#currentTrainList").append(
                         '<hr>' +
