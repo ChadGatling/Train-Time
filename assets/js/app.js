@@ -36,13 +36,19 @@ $(document).ready(function() {
         var firstTrainTime = $("#addFirstTrainTime").val().trim();
         var frequency = $("#addFrequency").val().trim();
 
-        // Push the data to the database (inside a variable so as to be able to get the key later)
-        childKey = database.ref().push({
-            trainName: trainName,
-            destination: destination,
-            firstTrainTime: firstTrainTime,
-            frequency: frequency
-        }).key;
+        //Validate inputs
+        if (firstTrainTime === "" || firstTrainTime.length !== 4 || (firstTrainTime % 100) - 59 > 0 || firstTrainTime - 2359 > 0) {
+            alert("Please enter a valid First train time.")
+
+        }else {
+            // Push the data to the database (inside a variable so as to be able to get the key later)
+            childKey = database.ref().push({
+                trainName: trainName,
+                destination: destination,
+                firstTrainTime: firstTrainTime,
+                frequency: frequency
+            }).key;
+        }
     }
     // When database is updated add new values to current train list
     function addToList(snapshot) {
@@ -56,8 +62,6 @@ $(document).ready(function() {
 
             // Clear then rebuild the train list labels every 60 seconds 
             rePaint();
-            clearInterval(timerID);
-            var timerID = setInterval(rePaint, 10 * 1000);
             function rePaint() {
                 console.log("Updated " + moment().format("HHmm ss"));
 
