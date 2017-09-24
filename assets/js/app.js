@@ -19,10 +19,13 @@ $(document).ready(function() {
     var database = firebase.database();
     var rightMeow = moment(); // now
     var keyList = [];
-    var trainCount;
 
     database.ref().on("value", addToList);
     $("#addNewTrainInfo").click(addNewTrainInfo);
+    $("#clearTrains").click(function (event) { 
+        event.preventDefault();       
+        database.ref().remove();
+    });
 
     console.log(moment().format("HHmm"));
 
@@ -56,9 +59,6 @@ $(document).ready(function() {
         if (snapshot.exists()) {
             console.log("Exists");
 
-            trainCount = snapshot.numChildren();
-
-            console.log("Train count: " + trainCount);
             console.log(snapshot.val());
 
             // Clear then rebuild the train list labels every 60 seconds 
@@ -81,23 +81,29 @@ $(document).ready(function() {
                 // Run a function for every child in the root
                 snapshot.forEach(function(childSnapshot) {
 
-                    var trainName = childSnapshot.val().trainName;
-                    var destination = childSnapshot.val().destination;
-                    var frequency = childSnapshot.val().frequency;
-                    var firstTrainTime = childSnapshot.val().firstTrainTime;
-                    var minutesAway = moment(firstTrainTime, "HHmm").diff(rightMeow, "minutes");
+                    var trainName = "";
+                    var destination = "";
+                    var frequency = "";
+                    var firstTrainTime = "";
+                    var minutesAway = "";
 
-                    if (moment(firstTrainTime, "HHmm").diff(rightMeow, "minutes") < 0) {
-                        console.log("First time: " + firstTrainTime);    
-                        firstTrainTime = moment(firstTrainTime, "HHmm").add(frequency, "minutes").format("HHmm");
-                        console.log("Second time: " + firstTrainTime);
-                        database.ref().set({
-                            trainName: trainName,
-                            destination: destination,
-                            firstTrainTime: firstTrainTime, // Overwriting all database
-                            frequency: frequency
-                        });
-                    }
+                    trainName = childSnapshot.val().trainName;
+                    destination = childSnapshot.val().destination;
+                    frequency = childSnapshot.val().frequency;
+                    firstTrainTime = childSnapshot.val().firstTrainTime;
+                    minutesAway = moment(firstTrainTime, "HHmm").diff(rightMeow, "minutes");
+
+                    // if (moment(firstTrainTime, "HHmm").diff(rightMeow, "minutes") < 0) {
+                    //     console.log("First time: " + firstTrainTime);    
+                    //     firstTrainTime = moment(firstTrainTime, "HHmm").add(frequency, "minutes").format("HHmm");
+                    //     console.log("Second time: " + firstTrainTime);
+                    //     database.ref().set({
+                    //         trainName: trainName,
+                    //         destination: destination,
+                    //         firstTrainTime: firstTrainTime, // Overwriting all database
+                    //         frequency: frequency
+                    //     });
+                    // }
 
                     $("#currentTrainList").append(
                         '<hr>' +
@@ -114,9 +120,14 @@ $(document).ready(function() {
         } else {
             console.log("Doesn't Exist")
 
-            trainCount = 0;
-
-            $("#currentTrainList").append(
+            $("#currentTrainList").html(
+                '<div class="row">' +
+                '<div class="col-3"><strong>Train Name</strong></div>' +
+                '<div class="col-3"><strong>Destination</strong></div>' +
+                '<div class="col-2"><strong>Frequency (min)</strong></div>' +
+                '<div class="col-2"><strong>Next Arrival</strong></div>' +
+                '<div class="col-2"><strong>Minutes Away</strong></div>' +
+                '</div>' +
                 '<hr>' +
                 '<div class="row">' +
                 '<div class="col-3">None</div>' +
